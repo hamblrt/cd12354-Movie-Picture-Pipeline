@@ -96,4 +96,4 @@ jobs:
     - name: Run frontend tests for build
       run: cd frontend &&  npm test   
     - name:  Build the Docker image
-      run: cd frontend && docker build --build-arg=REACT_APP_MOVIE_API_URL=${{REACT_APP_MOVIE_API_URL}} --tag=mp-frontend:latest .    
+      run: cd frontend && docker build --build-arg=REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL --tag=mp-frontend:latest .    
