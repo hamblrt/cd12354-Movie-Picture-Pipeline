@@ -26,6 +26,8 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: pip
+    - name: Setup pipenv
+      run: cd backend &&  pip install pipenv
     - name: Install python dependencies
       run: cd backend &&  pipenv install
     - name: Run backend linter
@@ -41,6 +43,8 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: pip
+    - name: Setup pipenv
+      run: cd backend &&  pip install pipenv
     - name: Install python dependencies
       run: cd backend &&  pipenv install
     - name: Run backend linter
