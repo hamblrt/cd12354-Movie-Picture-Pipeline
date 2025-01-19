@@ -1,0 +1,99 @@
+name: Movie Picture Frontend CI
+
+on:
+  # Allow Manual triggering of frontend CI
+  workflow_dispatch:
+  
+  # Any pull request activity on main branch in frontend folders
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'frontend/**'
+
+# Environment variable
+env:
+  NODE_VERSION='latest'
+  REACT_APP_MOVIE_API_URL='http://localhost:5000'
+
+jobs:
+  frontend-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Setup Node.js version from environment
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    - name: Cache node modules forr frontend lint
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+    - name: Install Node dependencies
+      run: cd frontend &&  npm ci
+    - name: Run frontend linter
+      run: cd frontend &&  npm run lint    
+
+  frontend-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Setup Node.js version from environment
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    - name: Cache node modules for frontend test
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+    - name: Install Node dependencies
+      run: cd frontend &&  npm ci
+    - name: Run frontend tests
+      run: cd frontend &&  npm test   
+
+  frontend-build:
+    needs: [frontend-lint, frontend-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Setup Node.js version from environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+    - name: Cache node modules for frontend build
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+    - name: Install Node dependencies for build
+      run: cd frontend &&  npm ci
+    - name: Run frontend tests for build
+      run: cd frontend &&  npm test   
+    - name:  Build the Docker image
+        run: cd frontend && docker build --build-arg=REACT_APP_MOVIE_API_URL=${{REACT_APP_MOVIE_API_URL}} --tag=mp-frontend:latest .    
