@@ -15,9 +15,9 @@ on:
 env:
   PYTHON_VERSION: '3.10.6'
   #Set FAIL_TEST flag to 'true' to force a failure of test job. Set to empty string to unset simulated failure mode
-  FAIL_TEST: 'true'
+  FAIL_TEST: ''
   #Set LINTER to 'lint-fail' to simulate lint errors. Set to 'lint' to actually run the lint task 
-  LINTER: 'lint-fail'
+  LINTER: 'lint'
 
 jobs:
   backend-lint:
