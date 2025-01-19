@@ -52,7 +52,7 @@ jobs:
     - name: Install python dependencies
       run: cd backend &&  pipenv install -d
     - name: Run backend linter
-      run: cd backend && FAIL_TEST=$FAIL_TEST pipenv run test   
+      run: cd backend && [ $FAIL_TEST == '' ] && pipenv run test || FAIL_TEST=$FAIL_TEST pipenv run test    
 
   backend-build:
     needs: [backend-lint, backend-test]
