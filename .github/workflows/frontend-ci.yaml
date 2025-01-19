@@ -15,9 +15,6 @@ on:
 env:
   NODE_VERSION: 'latest'
   REACT_APP_MOVIE_API_URL: 'http://localhost:5000'
-  #Set Fail flags to 'true' to force a failure of lint/test jobs. Set to empty string to unset simulated failure mode
-  FAIL_TEST: ''
-  FAIL_LINT: ''
 
 jobs:
   frontend-lint:
@@ -44,7 +41,7 @@ jobs:
     - name: Install Node dependencies
       run: cd frontend &&  npm ci
     - name: Run frontend linter
-      run: cd frontend &&  FAIL_LINT=$FAIL_LINT npm run lint    
+      run: cd frontend && npm run lint    
 
   frontend-test:
     runs-on: ubuntu-latest
@@ -70,7 +67,7 @@ jobs:
     - name: Install Node dependencies
       run: cd frontend &&  npm ci
     - name: Run frontend tests
-      run: cd frontend &&  FAIL_TEST=$FAIL_TEST npm test   
+      run: cd frontend && npm test   
 
   frontend-build:
     needs: [frontend-lint, frontend-test]
