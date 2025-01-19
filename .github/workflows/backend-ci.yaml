@@ -14,6 +14,9 @@ on:
 # Environment variable
 env:
   PYTHON_VERSION: '3.10.6'
+  #Set Fail flags to 'true' to force a failure of lint/test jobs. Set to empty string to unset simulated failure mode
+  FAIL_TEST: 'true'
+  FAIL_LINT: 'true'
 
 jobs:
   backend-lint:
@@ -31,7 +34,7 @@ jobs:
     - name: Install python dependencies
       run: cd backend &&  pipenv install -d
     - name: Run backend linter
-      run: cd backend &&  pipenv run lint   
+      run: cd backend &&  FAIL_LINT=$FAIL_LINT pipenv run lint   
 
   backend-test:
     runs-on: ubuntu-latest
@@ -48,7 +51,7 @@ jobs:
     - name: Install python dependencies
       run: cd backend &&  pipenv install -d
     - name: Run backend linter
-      run: cd backend &&  pipenv run test   
+      run: cd backend && FAIL_TEST=$FAIL_TEST pipenv run test   
 
   backend-build:
     needs: [backend-lint, backend-test]

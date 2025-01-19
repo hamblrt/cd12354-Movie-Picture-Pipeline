@@ -15,6 +15,7 @@ on:
 env:
   NODE_VERSION: 'latest'
   REACT_APP_MOVIE_API_URL: 'http://localhost:5000'
+  #Set Fail flags to 'true' to force a failure of lint/test jobs. Set to empty string to unset simulated failure mode
   FAIL_TEST: ''
   FAIL_LINT: ''
 
