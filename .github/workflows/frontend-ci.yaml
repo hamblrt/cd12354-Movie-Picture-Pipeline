@@ -73,12 +73,12 @@ jobs:
     needs: [frontend-lint, frontend-test]
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-      - name: Setup Node.js version from environment
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Setup Node.js version from environment
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
     - name: Cache node modules for frontend build
       id: cache-npm
       uses: actions/cache@v3
@@ -96,4 +96,4 @@ jobs:
     - name: Run frontend tests for build
       run: cd frontend &&  npm test   
     - name:  Build the Docker image
-        run: cd frontend && docker build --build-arg=REACT_APP_MOVIE_API_URL=${{REACT_APP_MOVIE_API_URL}} --tag=mp-frontend:latest .    
+      run: cd frontend && docker build --build-arg=REACT_APP_MOVIE_API_URL=${{REACT_APP_MOVIE_API_URL}} --tag=mp-frontend:latest .    
