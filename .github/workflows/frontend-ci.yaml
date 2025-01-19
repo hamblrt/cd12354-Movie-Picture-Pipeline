@@ -15,8 +15,8 @@ on:
 env:
   NODE_VERSION: 'latest'
   REACT_APP_MOVIE_API_URL: 'http://localhost:5000'
-  FAIL_TEST: 'false'
-  FAIL_LINT: 'false'
+  FAIL_TEST: ''
+  FAIL_LINT: ''
 
 jobs:
   frontend-lint:
