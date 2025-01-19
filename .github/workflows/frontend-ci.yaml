@@ -13,8 +13,8 @@ on:
 
 # Environment variable
 env:
-  NODE_VERSION='latest'
-  REACT_APP_MOVIE_API_URL='http://localhost:5000'
+  NODE_VERSION: 'latest'
+  REACT_APP_MOVIE_API_URL: 'http://localhost:5000'
 
 jobs:
   frontend-lint:
