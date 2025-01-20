@@ -1,15 +1,15 @@
-name: Movie Picture Frontend CD
+name: Movie Picture Frontend CD Fail Simulator
 
 on:
   # Allow Manual triggering of frontend CD
   workflow_dispatch:
   
   # Any push to main branch in frontend folders
-  push:
-    branches:
-      - 'main'
-    paths:
-      - 'frontend/**'
+  #push:
+  #  branches:
+  #    - 'main'
+  #  paths:
+  #    - 'frontend/**'
 
 # Environment variable
 env:
@@ -42,7 +42,7 @@ jobs:
     - name: Install Node dependencies
       run: cd frontend &&  npm ci
     - name: Run frontend linter
-      run: cd frontend && npm run lint    
+      run: cd frontend && FAIL_LINT=true npm run lint    
 
   frontend-test:
     runs-on: ubuntu-latest
@@ -68,7 +68,7 @@ jobs:
     - name: Install Node dependencies
       run: cd frontend &&  npm ci
     - name: Run frontend tests
-      run: cd frontend && CI=true npm test   
+      run: cd frontend && FAIL_TEST=true CI=true npm test   
 
   frontend-build-push:
     needs: [frontend-lint, frontend-test]

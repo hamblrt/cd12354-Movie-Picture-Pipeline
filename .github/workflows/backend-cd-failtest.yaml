@@ -1,0 +1,104 @@
+name: Movie Picture Backend CD Fail Simulator
+
+on:
+  # Allow Manual triggering of backend CD
+  workflow_dispatch:
+  
+  # Any push to main branch in backend folders
+  #push:
+  #  branches:
+  #    - 'main'
+  #  paths:
+  #    - 'backend/**'
+
+# Environment variable
+env:
+  PYTHON_VERSION: '3.10.6'
+  ECR_REPO: '991474059648.dkr.ecr.us-east-1.amazonaws.com/user3577726/backend'
+
+jobs:
+  backend-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Setup Python version from environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: pip
+    - name: Setup pipenv
+      run: cd backend &&  pip install pipenv
+    - name: Install python dependencies
+      run: cd backend &&  pipenv install -d
+    - name: Run backend linter
+      run: cd backend && pipenv run lint-fail  
+
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Setup Python version from environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: pip
+    - name: Setup pipenv
+      run: cd backend &&  pip install pipenv
+    - name: Install python dependencies
+      run: cd backend &&  pipenv install -d
+    - name: Run backend linter
+      run: cd backend && FAIL_TEST=true pipenv run test    
+
+  backend-build-push:
+    needs: [backend-lint, backend-test]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Setup Python version from environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }} 
+    # Setup AWS credentials from GitHub secrets      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: 'us-east-1'
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    - name: Build, tag, and push docker image to Amazon ECR
+      run: |
+        cd backend
+        docker build --tag=$ECR_REPO:$GITHUB_SHA .    
+        docker push $ECR_REPO:$GITHUB_SHA
+  
+  backend-deploy:
+    needs: backend-build-push
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    # Setup AWS credentials from GitHub secrets 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: 'us-east-1'
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    # Update kubeconfig with EKS cluster details
+    - name: Set up kubectl config
+      run: aws eks update-kubeconfig --name user3577726-project-cluster --region us-east-1
+    # Apply kustomize image patch and deploy backend to kubernetes
+    - name: Deploy to EKS cluster
+      run : |
+        cd backend/k8s
+        kustomize edit set image backend=$ECR_REPO:$GITHUB_SHA
+        kustomize build | kubectl apply -k .

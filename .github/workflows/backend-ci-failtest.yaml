@@ -1,0 +1,64 @@
+name: Movie Picture Backend CI Fail Simulator
+
+on:
+  # Allow Manual triggering of backend CI
+  workflow_dispatch:
+  
+  # Any pull request activity on main branch in backend folders
+  #pull_request:
+  #  branches:
+  #  paths:
+  #    - 'backend/**'
+  #    - 'main'
+
+# Environment variable
+env:
+  PYTHON_VERSION: '3.10.6'
+
+jobs:
+  backend-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Setup Python version from environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: pip
+    - name: Setup pipenv
+      run: cd backend &&  pip install pipenv
+    - name: Install python dependencies
+      run: cd backend &&  pipenv install -d
+    - name: Run backend linter
+      run: cd backend && pipenv run lint-fail  
+
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Setup Python version from environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: pip
+    - name: Setup pipenv
+      run: cd backend &&  pip install pipenv
+    - name: Install python dependencies
+      run: cd backend &&  pipenv install -d
+    - name: Run backend linter
+      run: cd backend && FAIL_TEST=true pipenv run test    
+
+  backend-build:
+    needs: [backend-lint, backend-test]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Setup Python version from environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }} 
+    - name:  Build the Docker image
+      run: cd backend && docker build --tag mp-backend:latest .   
