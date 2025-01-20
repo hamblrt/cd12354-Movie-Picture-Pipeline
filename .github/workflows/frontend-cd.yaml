@@ -5,11 +5,11 @@ on:
   workflow_dispatch:
   
   # Any push to main branch in frontend folders
-  push:
-    branches:
-      - 'main'
-    paths:
-      - 'frontend/**'
+  #push:
+  #  branches:
+  #    - 'main'
+  #  paths:
+  #    - 'frontend/**'
 
 # Environment variable
 env:
@@ -76,5 +76,18 @@ jobs:
     steps:
     - name: Check out repository
       uses: actions/checkout@v3
-    - name:  Build the Docker image
-      run: cd frontend && docker build --build-arg=REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL --tag=$ECR_REPO:$GITHUB_SHA .    
+    # Setup AWS credentials from GitHub secrets      
+    - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-1'
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    - name: Build, tag, and push docker image to Amazon ECR
+      run: |
+        cd frontend
+        docker build --build-arg=REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL --tag=$ECR_REPO:$GITHUB_SHA .    
+        docker push $ECR_REPO:$GITHUB_SHA
