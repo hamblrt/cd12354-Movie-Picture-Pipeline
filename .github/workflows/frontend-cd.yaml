@@ -5,16 +5,16 @@ on:
   workflow_dispatch:
   
   # Any push to main branch in frontend folders
-  #push:
-  #  branches:
-  #    - 'main'
-  #  paths:
-  #    - 'frontend/**'
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'frontend/**'
 
 # Environment variable
 env:
   NODE_VERSION: 'latest'
-  REACT_APP_MOVIE_API_URL: 'http://localhost:5000'
+  REACT_APP_MOVIE_API_URL: 'http://a87a6e87feff44caf8ed9e8aac4e21fd-1552908834.us-east-1.elb.amazonaws.com'
   ECR_REPO: '991474059648.dkr.ecr.us-east-1.amazonaws.com/user3577726/frontend'
 
 jobs:
