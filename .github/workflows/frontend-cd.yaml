@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   
   # Any push to main branch in frontend folders
-  push:
+  #push:
   #  branches:
   #    - 'main'
   #  paths:
