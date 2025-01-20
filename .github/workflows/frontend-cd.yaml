@@ -70,7 +70,7 @@ jobs:
     - name: Run frontend tests
       run: cd frontend && npm test   
 
-  frontend-build:
+  frontend-build-push:
     needs: [frontend-lint, frontend-test]
     runs-on: ubuntu-latest
     steps:
@@ -91,3 +91,29 @@ jobs:
         cd frontend
         docker build --build-arg=REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL --tag=$ECR_REPO:$GITHUB_SHA .    
         docker push $ECR_REPO:$GITHUB_SHA
+  
+  frontend-deploy:
+    needs: frontend-build-push
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    # Setup AWS credentials from GitHub secrets 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: 'us-east-1'
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    # Update kubeconfig with EKS cluster details
+    - name: Set up kubectl config
+      run: aws eks update-kubeconfig --name user3577726-project-cluster --region us-east-1
+    # Apply kustomize image patch and deploy frontend to kubernetes
+    - name: Deploy to EKS cluster
+      run : |
+        cd frontend/k8s
+        kustomize edit set image frontend=$ECR_REPO:$GITHUB_SHA
+        kustomize build | kubectl apply -k .
